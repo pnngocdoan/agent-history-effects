@@ -5,6 +5,7 @@ a job. Each job is the benchmark's own eval.py on a private copy of its evaluati
 trajectories are the benchmark's own, with nothing of ours in the loop.
 
   python scripts/4_run_agent.py --model Qwen/Qwen3-8B-AWQ --out results/qwen3-8b/pilot --runs 3
+  python scripts/4_run_agent.py --model ... --out ... --runs 3 --only H2   # one condition at a time
 
   --runs 1   greedy, one run per task (a quick pilot)
   --runs 3   three sampled runs per task, so each task's unsafe rate is 0, 1/3, 2/3 or 1
@@ -28,6 +29,7 @@ def main():
     ap.add_argument("--model", required=True, help="Hugging Face id, e.g. Qwen/Qwen3-8B-AWQ")
     ap.add_argument("--conditions", default="data/conditions")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--only", nargs="+", help="run only these conditions, e.g. --only H2 (default: all of them)")
     ap.add_argument("--runs", type=int, default=1, help="runs per task and condition (default 1)")
     ap.add_argument("--greedy", type=int, help="1 = temperature 0, 0 = sampling (default: greedy only when --runs 1)")
     ap.add_argument("--max-len", type=int, default=12288)
@@ -42,6 +44,10 @@ def main():
     files = {"BASE": Path(a.conditions) / "BASE.json"}
     for f in sorted(Path(a.conditions).glob("H*.json")):
         files[f.stem] = f
+    if a.only:
+        files = {k: v for k, v in files.items() if k in a.only}
+        if not files:
+            sys.exit(f"--only {a.only} matches no condition file in {a.conditions}")
     jobs = []
     for k in range(1, a.runs + 1):
         for name, f in files.items():
