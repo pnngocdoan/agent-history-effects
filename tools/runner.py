@@ -159,7 +159,10 @@ def start_server(hf_id, name, gpu, port, max_len, gpu_mem, log_dir):
     cmd = [sys.executable, "-m", "vllm.entrypoints.openai.api_server", "--model", hf_id, "--served-model-name", name,
            "--dtype", "half",  # the T4 has no bf16
            "--max-model-len", str(max_len), "--gpu-memory-utilization", str(gpu_mem),
-           "--enable-auto-tool-choice", "--tool-call-parser", "hermes", "--port", str(port)]
+           "--enable-auto-tool-choice", "--tool-call-parser", "hermes", "--port", str(port),
+           # the 3 runs of a task share one prompt, and an H5 prompt is thousands of tokens of
+           # history, so caching the prefix saves re-reading it on runs 2 and 3
+           "--enable-prefix-caching"]
     env = dict(os.environ, CUDA_VISIBLE_DEVICES=str(gpu))
     proc = subprocess.Popen(cmd, env=env, stdout=open(log, "w"), stderr=subprocess.STDOUT, start_new_session=True)
     return proc, log
