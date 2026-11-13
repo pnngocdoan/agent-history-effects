@@ -1,0 +1,7 @@
+results/*
+!results/.gitkeep
+data/tasks.json
+data/conditions/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
