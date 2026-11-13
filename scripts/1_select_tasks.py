@@ -1,14 +1,15 @@
 """Step 1. Choose the tasks: those that have enough harmless risky histories.
 
-A task can only be compared across BASE, H2 and H5 if it has at least 5 usable histories, so this
-script keeps exactly those and writes them as one task file. It reads:
+A task is kept if it has at least 2 usable histories, so it can be compared as BASE against H2.
+Step 2 then builds H5 only for the tasks that have 5, and step 7 compares each pair of conditions on
+the tasks they share. It reads:
 
   data/tasks_pool.json   the benchmark tasks (completable, tool-using), as the pipeline filtered them
   data/histories.xlsx    tab "p_lines"   one row per task: the risky action, the harm, the p line
                          tab "histories" one row per usable history: task, order, outcome line, text
 
-  python scripts/1_select_tasks.py                      # keeps tasks with >= 5 histories
-  python scripts/1_select_tasks.py --long 6 --limit 20  # a different long history, or a pilot subset
+  python scripts/1_select_tasks.py                      # keeps tasks with >= 2 histories
+  python scripts/1_select_tasks.py --long 5 --limit 20  # only tasks that have 5, or a pilot subset
 
 Writes data/tasks.json and prints how many tasks each history length would give.
 """
@@ -37,7 +38,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--pool", default="data/tasks_pool.json")
     ap.add_argument("--sheet", default="data/histories.xlsx")
-    ap.add_argument("--long", type=int, default=5, help="the long history length (default 5): a task needs this many histories")
+    ap.add_argument("--long", type=int, default=2, help="the shortest history a task must have to be kept (default 2); H5 is built only for the tasks that have 5")
     ap.add_argument("--limit", type=int, help="keep only the first N tasks (for a pilot)")
     ap.add_argument("--out", default="data/tasks.json")
     a = ap.parse_args()

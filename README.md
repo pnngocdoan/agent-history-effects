@@ -29,9 +29,10 @@ Claude Haiku then compares the pair for each task and condition: did the agent f
 did it skip a precaution its plan named, does its thinking cite the earlier experiences as a reason
 the task is fine.
 
-Tasks come from [Agent-SafetyBench](https://github.com/thu-coai/Agent-SafetyBench). 57 of the 100
-tasks in the saved histories have at least 5 usable histories; all of them are kept, and none is
-dropped for being unsafe in every `BASE` run.
+Tasks come from [Agent-SafetyBench](https://github.com/thu-coai/Agent-SafetyBench). Of the 100 tasks
+in the saved histories, 71 have at least 2 usable histories and 57 have at least 5, so `BASE` against
+`H2` is compared on 71 tasks and `BASE` against `H5` on 57. A third table puts all three side by side
+on the tasks they all share. No task is dropped for being unsafe in every `BASE` run.
 
 ## Running it
 
@@ -45,10 +46,12 @@ git submodule update --init
 bash tools/apply_patches.sh
 pip install vllm openpyxl
 
-python scripts/1_select_tasks.py --long 5
+python scripts/1_select_tasks.py --long 2
 python scripts/2_build_conditions.py --lengths 2 5
 python scripts/3_run_belief.py --model Qwen/Qwen3-8B-AWQ --out results/qwen3-8b --runs 3
-python scripts/4_run_agent.py  --model Qwen/Qwen3-8B-AWQ --out results/qwen3-8b --runs 3
+python scripts/4_run_agent.py  --model Qwen/Qwen3-8B-AWQ --out results/qwen3-8b --runs 3 --only BASE
+python scripts/4_run_agent.py  --model Qwen/Qwen3-8B-AWQ --out results/qwen3-8b --runs 3 --only H2
+python scripts/4_run_agent.py  --model Qwen/Qwen3-8B-AWQ --out results/qwen3-8b --runs 3 --only H5
 python scripts/5_judge.py      --out results/qwen3-8b
 ANTHROPIC_API_KEY=... python scripts/6_compare.py --out results/qwen3-8b
 python scripts/7_analyze.py    --out results/qwen3-8b
@@ -58,13 +61,13 @@ Every script takes `--help`, writes its results as it goes, and skips finished w
 
 | script | what it does |
 | --- | --- |
-| `1_select_tasks.py` | keeps the tasks that have enough histories |
+| `1_select_tasks.py` | keeps the tasks that have at least 2 histories |
 | `2_build_conditions.py` | writes `BASE`, `H2` and `H5` |
 | `3_run_belief.py` | the belief run (no tools) |
 | `4_run_agent.py` | the execution run (tools) |
 | `5_judge.py` | ShieldAgent: safe or unsafe |
 | `6_compare.py` | Haiku: belief against execution |
-| `7_analyze.py` | shares per condition, changes against `BASE` with bootstrap intervals |
+| `7_analyze.py` | one table per pair of conditions, each on the tasks they share, with bootstrap intervals |
 
 ## Provenance
 

@@ -90,6 +90,7 @@ def main():
     ap.add_argument("--model", required=True, help="Hugging Face id, e.g. Qwen/Qwen3-8B-AWQ")
     ap.add_argument("--conditions", default="data/conditions")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--only", nargs="+", help="run only these conditions, e.g. --only H2 (default: all of them)")
     ap.add_argument("--runs", type=int, default=1, help="belief runs per task and condition (default 1)")
     ap.add_argument("--temperature", type=float, default=0.6, help="Qwen3 thinking should not be run greedy")
     ap.add_argument("--max-tokens", type=int, default=3000)
@@ -102,6 +103,10 @@ def main():
     files = {"BASE": Path(a.conditions) / "BASE.json"}
     for f in sorted(Path(a.conditions).glob("H*.json")):
         files[f.stem] = f
+    if a.only:
+        files = {k: v for k, v in files.items() if k in a.only}
+        if not files:
+            sys.exit(f"--only {a.only} matches no condition file in {a.conditions}")
     prompts = [(name, str(t["id"]), k, t["instruction"] + "\n\n" + QUESTION)
                for name, f in files.items() for t in json.loads(f.read_text())
                for k in range(1, a.runs + 1)]
