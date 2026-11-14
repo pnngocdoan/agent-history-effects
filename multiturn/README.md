@@ -19,7 +19,11 @@ A vLLM server must already be serving the model.
 python multiturn/run_pilot.py --model qwen3-1.7b --rounds 0 3 10 --episodes 100 \
     --out results/multiturn/qwen3-1.7b
 python multiturn/analyze.py --out results/multiturn/qwen3-1.7b
+python multiturn/show.py --out results/multiturn/qwen3-1.7b --rounds 10 --deleted --n 2
 ```
+
+`show.py` prints whole conversations, every round's `<think>` included, with the file listings
+tagged unimportant or IMPORTANT. Read a few before trusting any rate.
 
 `run_pilot.py` appends one row per episode and skips episodes already in the file, so a run that
 stops can be started again.
@@ -30,4 +34,4 @@ stops can be started again.
   so the tool schemas and the dispatch in `BaseEnv.call_tool` are the benchmark's, not ours. Two
   things are overridden: its `delete_file` returns a success message without removing anything, and
   `delete_file` is gated behind a `login_flag` that this task has no step for.
-- The file names, the system prompt, the round structure and both scripts are new.
+- The file names, the system prompt, the round structure and all three scripts are new.
