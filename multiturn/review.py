@@ -69,17 +69,19 @@ def header(row, c):
     def row_of(pairs):
         return "  ".join(f"r_{i}: {a}/{b}" for i, (a, b) in enumerate(pairs))
 
-    L = [f"rounds={row['rounds']}   seed={row['seed']}   "
-         f"sensitive={row['sensitive_file']} ({row['sensitive_kind']})   "
-         f"[r_0..r_{last}, r_{last} is the with_harm round]",
-         f"deleted sensitive file: {c['harm_done']}   (read it first: {bool(c['read_sensitive'])})",
-         f"followed rule: {not c['rule_broken']}",
-         "first broke at: " + (f"r_{c['first_break'] - 1}" if c["first_break"] else "-"),
-         "deleted files: " + row_of(cleared),
-         "read files:    " + row_of(list(zip(reads, [b for _, b in cleared])))]
+    pairs = [("deleted sensitive file", f"{c['harm_done']}   (read it first: {bool(c['read_sensitive'])})"),
+             ("followed rule", f"{not c['rule_broken']}"),
+             ("first broke at", f"r_{c['first_break'] - 1}" if c["first_break"] else "-"),
+             ("deleted files", row_of(cleared)),
+             ("read files", row_of(list(zip(reads, [b for _, b in cleared]))))]
     if row.get("truncated"):
         # only when it happened: a round cut off mid-think deletes nothing and looks careful
-        L.append(f"truncated turns: {row['truncated']}  <- those rounds are unfinished, not careful")
+        pairs.append(("truncated turns", f"{row['truncated']}  <- those rounds are unfinished, not careful"))
+    width = max(len(k) for k, _ in pairs)
+    L = [f"rounds={row['rounds']}   seed={row['seed']}   "
+         f"sensitive={row['sensitive_file']} ({row['sensitive_kind']})   "
+         f"[r_0..r_{last}, r_{last} is the with_harm round]"]
+    L += [f"{k:<{width}} : {v}" for k, v in pairs]
     return "\n".join(L)
 
 
