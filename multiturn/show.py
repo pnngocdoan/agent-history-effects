@@ -22,17 +22,11 @@ def wrap(text, indent):
 
 
 def render(row):
-    lines = [f"{'=' * W}",
-             f"rounds={row['rounds']}  seed={row['seed']}  "
-             f"sensitive file: {row['sensitive_file']} ({row['sensitive_kind']})",
-             f"deleted it: {row['deleted_sensitive']}   read it first: {row['read_sensitive']}   "
-             f"asked: {row['asked']}",
-             f"files read in the with_harm round: {row['files_read_harm']} of {row['files_total']}"
-             f"   reads per without_harm round: {row['reads_per_round']}",
-             f"{'=' * W}"]
-    # the last round is the with_harm one: its listing holds the IMPORTANT file
+    """The conversation only. The numbers are review.header's job, printed above this."""
+    lines = []
+    # the last round is the with_harm one: its listing holds the sensitive file
     last_round = sum(1 for m in row["messages"] if m.get("role") == "user")
-    round_no = 0
+    round_no = -1  # r_0 numbering, the same as review.header
     for m in row["messages"]:
         role = m.get("role")
         content = m.get("content") or ""
@@ -40,9 +34,9 @@ def render(row):
             lines += ["", "SYSTEM", wrap(content, "  ")]
         elif role == "user":
             round_no += 1
-            head = (f"--- round {round_no}: with_harm, the IMPORTANT file is in this listing ---"
-                    if round_no == last_round else
-                    f"--- round {round_no}: without_harm, disposable files only ---")
+            head = (f"--- r_{round_no}: with_harm, the sensitive file is in this listing ---"
+                    if round_no == last_round - 1 else
+                    f"--- r_{round_no}: without_harm, junk files only ---")
             lines += ["", head, "USER", wrap(content, "  ")]
         elif role == "assistant":
             think = THINK.search(content)
@@ -75,7 +69,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--rounds", type=int, help="only this condition")
     ap.add_argument("--seed", type=int, help="one episode, by seed")
-    ap.add_argument("--deleted", action="store_true", help="only episodes that deleted the important file")
+    ap.add_argument("--deleted", action="store_true", help="only episodes that deleted the sensitive file")
     ap.add_argument("--kept", action="store_true", help="only episodes that did not")
     ap.add_argument("--n", type=int, default=1, help="how many to print (default 1)")
     a = ap.parse_args()
@@ -86,12 +80,14 @@ def main():
     if a.seed is not None:
         rows = [r for r in rows if r["seed"] == a.seed]
     if a.deleted:
-        rows = [r for r in rows if r["deleted_important"]]
+        rows = [r for r in rows if r["deleted_sensitive"]]
     if a.kept:
-        rows = [r for r in rows if not r["deleted_important"]]
+        rows = [r for r in rows if not r["deleted_sensitive"]]
     if not rows:
         raise SystemExit("no episode matches those filters")
+    from review import check, header
     for row in rows[:a.n]:
+        print(header(row, check(row)))
         print(render(row))
         print()
 
