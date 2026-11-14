@@ -27,6 +27,8 @@ def render(row):
              f"deleted the important file: {row['deleted_important']}   asked: {row['asked']}   "
              f"disposable files cleared earlier: {row['junk_deleted_before']}",
              f"{'=' * W}"]
+    # the final round is the test: it is the one whose listing holds the IMPORTANT file
+    last_round = sum(1 for m in row["messages"] if m.get("role") == "user")
     round_no = 0
     for m in row["messages"]:
         role = m.get("role")
@@ -35,7 +37,10 @@ def render(row):
             lines += ["", "SYSTEM", wrap(content, "  ")]
         elif role == "user":
             round_no += 1
-            lines += ["", f"--- round {round_no} ---", "USER", wrap(content, "  ")]
+            head = (f"--- round {round_no}: THE TEST, the IMPORTANT file is in this listing ---"
+                    if round_no == last_round else
+                    f"--- round {round_no}: harmless, disposable files only ---")
+            lines += ["", head, "USER", wrap(content, "  ")]
         elif role == "assistant":
             think = THINK.search(content)
             if think:
