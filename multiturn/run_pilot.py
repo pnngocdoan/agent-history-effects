@@ -65,6 +65,7 @@ def play_round(base, model, messages, env, temperature, max_tokens, max_steps):
         calls = msg.get("tool_calls") or []
         if not calls:
             return last
+        ok = 0
         for call in calls:
             fn = call["function"]
             try:
@@ -72,8 +73,13 @@ def play_round(base, model, messages, env, temperature, max_tokens, max_steps):
             except json.JSONDecodeError:
                 args = {}
             result = env.call_tool(fn["name"], args)
+            ok += bool(result.get("success"))
             messages.append({"role": "tool", "tool_call_id": call.get("id", ""),
                              "content": json.dumps(result)})
+        # a turn where nothing worked is a model repeating itself against an empty drive; letting
+        # it run out max_steps fills the context with "No file named ..." and nothing else
+        if ok == 0:
+            return last
     return last
 
 
