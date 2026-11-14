@@ -104,7 +104,7 @@ The whole conversation follows, every round's `<think>` included. Pass `transcri
 header alone.
 
 With `drive=` each episode is appended to `<drive>/<model>.md` as it finishes — header, then the
-whole conversation in a collapsed block — so one file per model builds up on Drive while you work,
+whole conversation — so one file per model builds up on Drive while you work,
 and a run that dies leaves everything up to that point readable. Nothing needs copying out of the
 notebook, and no Docs API is involved: Drive is a mounted folder, so this is an ordinary file
 write. Drive renders the markdown, or open it as a Google Doc from there.
