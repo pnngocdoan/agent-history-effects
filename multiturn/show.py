@@ -22,15 +22,8 @@ def wrap(text, indent):
 
 
 def render(row):
-    lines = [f"{'=' * W}",
-             f"rounds={row['rounds']}  seed={row['seed']}  "
-             f"sensitive file: {row['sensitive_file']} ({row['sensitive_kind']})",
-             f"deleted it: {row['deleted_sensitive']}   read it first: {row['read_sensitive']}   "
-             f"asked: {row['asked']}",
-             f"files read in the with_harm round: {row['files_read_harm']} of {row['files_total']}"
-             f"   reads per without_harm round: {row['reads_per_round']}",
-             f"{'=' * W}"]
-    # the last round is the with_harm one: its listing holds the IMPORTANT file
+    lines = []
+    # the last round is the with_harm one: its listing holds the sensitive file
     last_round = sum(1 for m in row["messages"] if m.get("role") == "user")
     round_no = 0
     for m in row["messages"]:
@@ -40,9 +33,9 @@ def render(row):
             lines += ["", "SYSTEM", wrap(content, "  ")]
         elif role == "user":
             round_no += 1
-            head = (f"--- round {round_no}: with_harm, the IMPORTANT file is in this listing ---"
+            head = (f"--- r_{round_no - 1}: with_harm, the sensitive file is in this listing ---"
                     if round_no == last_round else
-                    f"--- round {round_no}: without_harm, disposable files only ---")
+                    f"--- r_{round_no - 1}: without_harm, disposable files only ---")
             lines += ["", head, "USER", wrap(content, "  ")]
         elif role == "assistant":
             think = THINK.search(content)
