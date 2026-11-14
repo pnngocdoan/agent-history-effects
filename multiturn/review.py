@@ -100,7 +100,7 @@ def next_seed(path, k):
 
 
 def run_and_review(k, model, out, base_url="http://127.0.0.1:8000/v1", seed=None,
-                   files=4, temperature=0.6, max_tokens=3000, max_steps=12, transcript=True,
+                   files=None, temperature=0.6, max_tokens=6000, max_steps=12, transcript=True,
                    drive=None):
     """One episode at k without_harm rounds: run it, show what was measured, then the conversation.
 
