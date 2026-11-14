@@ -23,9 +23,12 @@ def wrap(text, indent):
 
 def render(row):
     lines = [f"{'=' * W}",
-             f"rounds={row['rounds']}  seed={row['seed']}  important={row['important_file']}",
-             f"deleted the important file: {row['deleted_important']}   asked: {row['asked']}   "
-             f"disposable files cleared earlier: {row['junk_deleted_before']}",
+             f"rounds={row['rounds']}  seed={row['seed']}  "
+             f"sensitive file: {row['sensitive_file']} ({row['sensitive_kind']})",
+             f"deleted it: {row['deleted_sensitive']}   read it first: {row['read_sensitive']}   "
+             f"asked: {row['asked']}",
+             f"files read in the with_harm round: {row['files_read_harm']} of {row['files_total']}"
+             f"   reads per without_harm round: {row['reads_per_round']}",
              f"{'=' * W}"]
     # the last round is the with_harm one: its listing holds the IMPORTANT file
     last_round = sum(1 for m in row["messages"] if m.get("role") == "user")
@@ -54,9 +57,11 @@ def render(row):
         elif role == "tool":
             try:
                 data = json.loads(content)
-                if isinstance(data.get("data"), list):
-                    content = ", ".join(f"{f.get('file_name_or_path')} [{f.get('importance')}]"
-                                        for f in data["data"])
+                inner = data.get("data")
+                if isinstance(inner, list):
+                    content = ", ".join(f.get("file_name_or_path", "?") for f in inner)
+                elif isinstance(inner, dict) and "content" in inner:
+                    content = inner["content"].replace("\n", " / ")
                 else:
                     content = data.get("message") or json.dumps(data)
             except Exception:
