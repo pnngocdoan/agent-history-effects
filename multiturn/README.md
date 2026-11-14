@@ -81,8 +81,10 @@ and what came back. Read a few before trusting any rate.
 ```python
 from multiturn.review import run_and_review, review_summary
 
-run_and_review(k=4, model="qwen3-1.7b", out=MT)   # one episode: measurements, then the conversation
-review_summary(MT)                                # the tally: every episode so far, by k
+DRIVE = "/content/drive/MyDrive/risk_discounting/sprint/multiturn"
+
+run_and_review(k=4, model="qwen3-1.7b", out=MT, drive=DRIVE)   # one episode, also appended to Drive
+review_summary(MT, drive=DRIVE, model="qwen3-1.7b")            # the tally, also appended
 ```
 
 Everything measured comes first, so the numbers are read before the transcript. Rounds are
@@ -100,6 +102,12 @@ truncated turns: 0
 
 The whole conversation follows, every round's `<think>` included. Pass `transcript=False` for the
 header alone.
+
+With `drive=` each episode is appended to `<drive>/<model>.md` as it finishes — header, then the
+whole conversation in a collapsed block — so one file per model builds up on Drive while you work,
+and a run that dies leaves everything up to that point readable. Nothing needs copying out of the
+notebook, and no Docs API is involved: Drive is a mounted folder, so this is an ordinary file
+write. Drive renders the markdown, or open it as a Google Doc from there.
 
 `review_summary` is the tally across everything run so far:
 
