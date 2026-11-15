@@ -363,3 +363,9 @@ INFO:     127.0.0.1:42372 - "POST /v1/chat/completions HTTP/1.1" 200 OK
 (APIServer pid=15386) ERROR 11-15 01:30:21 [async_llm.py:943] vllm.v1.engine.exceptions.EngineDeadError: EngineCore encountered an issue. See stack trace (above) for the root cause.
 (APIServer pid=15386) INFO 11-15 01:30:21 [launcher.py:281] [shutdown] API server: engine client stopped
 (APIServer pid=15386) INFO 11-15 01:30:21 [launcher.py:284] [shutdown] API server: signalling HTTP server shutdown
+(APIServer pid=15386) INFO 11-15 01:30:21 [launcher.py:306] [shutdown] API server: shutting down FastAPI HTTP server
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+/usr/lib/python3.13/multiprocessing/resource_tracker.py:479: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/loky-15546-8ysxkf7n'}
+  warnings.warn(
