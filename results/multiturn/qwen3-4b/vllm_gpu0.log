@@ -1,0 +1,143 @@
+W1115 01:19:53.557000 12576 torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1115 01:19:53.558000 12576 torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1115 01:19:53.558000 12576 torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+/usr/local/lib/python3.13/dist-packages/vllm/entrypoints/openai/api_server.py:24: DeprecationWarning: `vllm.entrypoints.openai.api_server` is deprecated and will likely beunsupported in a future version. Use the corresponding function from `vllm.entrypoints.launchers` instead.
+  warnings.warn(
+/usr/local/lib/python3.13/dist-packages/vllm/entrypoints/openai/api_server.py:51: DeprecationWarning: The `python -m vllm.entrypoints.openai.api_server` command is deprecated and may be removed in a future release. Please use `vllm server` instead.
+  warnings.warn(
+(APIServer pid=12576) INFO 11-15 01:20:02 [startup.py:38] 
+(APIServer pid=12576) INFO 11-15 01:20:02 [startup.py:38]        █     █     █▄   ▄█
+(APIServer pid=12576) INFO 11-15 01:20:02 [startup.py:38]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.33.0
+(APIServer pid=12576) INFO 11-15 01:20:02 [startup.py:38]   █▄█▀ █     █     █     █  model   Qwen/Qwen3-4B
+(APIServer pid=12576) INFO 11-15 01:20:02 [startup.py:38]    ▀▀  ▀▀▀▀▀ ▀▀▀▀▀ ▀     ▀
+(APIServer pid=12576) INFO 11-15 01:20:02 [startup.py:38] 
+(APIServer pid=12576) INFO 11-15 01:20:02 [startup.py:96] non-default args: {'enable_auto_tool_choice': True, 'tool_call_parser': 'hermes', 'model': 'Qwen/Qwen3-4B', 'dtype': 'half', 'max_model_len': 32768, 'served_model_name': ['qwen3-4b'], 'gpu_memory_utilization': 0.9, 'enable_prefix_caching': True}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+(APIServer pid=12576) INFO 11-15 01:20:03 [model.py:744] Resolved architecture: Qwen3ForCausalLM
+(APIServer pid=12576) WARNING 11-15 01:20:03 [model.py:2516] Casting torch.bfloat16 to torch.float16.
+(APIServer pid=12576) INFO 11-15 01:20:03 [model.py:2170] Using max model len 32768
+Parse safetensors files:   0%|          | 0/3 [00:00<?, ?it/s]Parse safetensors files:  33%|███▎      | 1/3 [00:00<00:00,  2.77it/s]Parse safetensors files: 100%|██████████| 3/3 [00:00<00:00,  6.40it/s]Parse safetensors files: 100%|██████████| 3/3 [00:00<00:00,  5.65it/s]
+(APIServer pid=12576) INFO 11-15 01:20:04 [kernel.py:480] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['triton', 'native'])
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Fetching 10 files:  40%|████      | 4/10 [00:00<00:00, 33.19it/s]Fetching 10 files: 100%|██████████| 10/10 [00:00<00:00, 49.23it/s]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/usr/local/lib/python3.13/dist-packages/vllm/entrypoints/openai/api_server.py", line 59, in <module>
+    main()
+    ~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/vllm/entrypoints/launchers/api_server/entry.py", line 226, in main
+    uvloop.run(run_server(args))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/uvloop/__init__.py", line 96, in run
+    return __asyncio.run(
+           ~~~~~~~~~~~~~^
+        wrapper(),
+        ^^^^^^^^^^
+    ...<2 lines>...
+        **run_kwargs
+        ^^^^^^^^^^^^
+    )
+    ^
+  File "/usr/lib/python3.13/asyncio/runners.py", line 196, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/asyncio/runners.py", line 119, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "uvloop/loop.pyx", line 1509, in uvloop.loop.Loop.run_until_complete
+  File "uvloop/loop.pyx", line 1502, in uvloop.loop.Loop.run_until_complete
+    self.run_forever()
+  File "uvloop/loop.pyx", line 1371, in uvloop.loop.Loop.run_forever
+    self._run(mode)
+  File "uvloop/loop.pyx", line 551, in uvloop.loop.Loop._run
+    raise self._last_error
+  File "uvloop/loop.pyx", line 471, in uvloop.loop.Loop._on_idle
+    handler._run()
+  File "uvloop/cbhandles.pyx", line 86, in uvloop.loop.Handle._run
+  File "uvloop/cbhandles.pyx", line 64, in uvloop.loop.Handle._run
+    callback()
+  File "/usr/local/lib/python3.13/dist-packages/uvloop/__init__.py", line 48, in wrapper
+    return await main
+           ^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/vllm/entrypoints/launchers/api_server/entry.py", line 176, in run_server
+    await run_server_worker(listen_address, sock, args, **uvicorn_kwargs)
+  File "/usr/local/lib/python3.13/dist-packages/vllm/entrypoints/launchers/api_server/entry.py", line 190, in run_server_worker
+    async with build_async_engine_client(
+               ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        args,
+        ^^^^^
+        client_config=client_config,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as engine_client:
+    ^
+  File "/usr/lib/python3.13/contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/vllm/entrypoints/launchers/api_server/entry.py", line 60, in build_async_engine_client
+    async with build_async_engine_client_from_engine_args(
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        engine_args,
+        ^^^^^^^^^^^^
+        usage_context=usage_context,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        client_config=client_config,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as engine:
+    ^
+  File "/usr/lib/python3.13/contextlib.py", line 214, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/vllm/entrypoints/launchers/api_server/entry.py", line 94, in build_async_engine_client_from_engine_args
+    async_llm = AsyncLLM.from_vllm_config(
+        vllm_config=vllm_config,
+    ...<6 lines>...
+        client_index=client_index,
+    )
+  File "/usr/local/lib/python3.13/dist-packages/vllm/v1/engine/async_llm.py", line 264, in from_vllm_config
+    return cls(
+        vllm_config=vllm_config,
+    ...<9 lines>...
+        client_index=client_index,
+    )
+  File "/usr/local/lib/python3.13/dist-packages/vllm/v1/engine/async_llm.py", line 167, in __init__
+    self.renderer = renderer = renderer_from_config(self.vllm_config)
+                               ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/vllm/renderers/registry.py", line 90, in renderer_from_config
+    return RENDERER_REGISTRY.load_renderer(renderer_mode, config, tokenizer)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/vllm/renderers/registry.py", line 72, in load_renderer
+    return renderer_cls(config, tokenizer)
+  File "/usr/local/lib/python3.13/dist-packages/vllm/renderers/hf.py", line 1058, in __init__
+    maybe_make_thread_pool(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        self.tokenizer, config.model_config.renderer_num_workers + 1
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/vllm/tokenizers/hf.py", line 47, in maybe_make_thread_pool
+    tokenizer_pool.put(copy.deepcopy(og_tokenizer))
+                       ~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/copy.py", line 163, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "/usr/lib/python3.13/copy.py", line 254, in _reconstruct
+    y = func(*args)
+  File "/usr/lib/python3.13/copy.py", line 253, in <genexpr>
+    args = (deepcopy(arg, memo) for arg in args)
+            ~~~~~~~~^^^^^^^^^^^
+  File "/usr/lib/python3.13/copy.py", line 163, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "/usr/lib/python3.13/copy.py", line 260, in _reconstruct
+    state = deepcopy(state, memo)
+  File "/usr/lib/python3.13/copy.py", line 137, in deepcopy
+    y = copier(x, memo)
+  File "/usr/lib/python3.13/copy.py", line 222, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+                             ~~~~~~~~^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/copy.py", line 163, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+  File "/usr/lib/python3.13/copy.py", line 262, in _reconstruct
+    y.__setstate__(state)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/vllm/entrypoints/launchers/api_server/entry.py", line 171, in _interrupt_init
+    raise KeyboardInterrupt("terminated")
+KeyboardInterrupt: terminated
