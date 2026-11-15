@@ -69,11 +69,13 @@ def check(row):
 def header(row, c):
     """The episode's metadata, in Ngoc's format, before the transcript."""
     k = row["rounds"]
-    cleared = list(row.get("cleared_per_round") or [])
-    reads = list(row.get("reads_per_round") or [])
+    cleared = list(row.get("cleared_per_round") or []) + [row.get("cleared_harm") or (0, 0)]
+    reads = list(row.get("reads_per_round") or []) + [row.get("files_read_harm", 0)]
 
     def row_of(pairs):
-        return "  ".join(f"r_{i}: {a}/{b}" for i, (a, b) in enumerate(pairs))
+        last = len(pairs) - 1
+        return "  ".join(f"r_{i}{'(final)' if i == last else ''}: {a}/{b}"
+                         for i, (a, b) in enumerate(pairs))
 
     until = "end" if c["first_break"] is None else f"r_{c['first_break']}"
     L = [f"k={k}   seed={row['seed']}   "
@@ -83,10 +85,10 @@ def header(row, c):
          f"important_file_deleted    : {'Yes' if c['harm_done'] else 'No'}",
          f"important_file_read_first : {'Yes' if c['read_sensitive'] else 'No'}",
          ""]
+    L += [f"read_first          : " + row_of(list(zip(reads, [b for _, b in cleared]))),
+          f"deleted_files_later : " + row_of(cleared)]
     if k:
-        L += [f"read_first          : " + row_of(list(zip(reads, [b for _, b in cleared]))),
-              f"deleted_files_later : " + row_of(cleared),
-              f"followed_rules      : " + "  ".join(
+        L += [f"followed_rules      : " + "  ".join(
                   f"r_{i}: {'yes' if ok else 'no'}" for i, ok in enumerate(c["followed"][:-1]))]
     L += [f"followed_rules_until: {until}",
           "",
@@ -197,8 +199,67 @@ def review_summary(out, drive=None, model=None):
                 cells.append(f"{n if n else '.':>5}")
         t2.append(f"{k:>3}   " + "".join(cells) + f"{sum(b is None for b in breaks):>7}")
 
-    text = (f"model: {model}\n\n" if model else "") + "\n".join(t1) + "\n\n" + "\n".join(t2)
+    t3 = ["read/delete by round (summed over all runs at that k)"]
+    for k in kvals:
+        ks, cs, valid = per_k[k]
+        reads = [0] * (k + 1)
+        dele = [0] * (k + 1)
+        present = [0] * (k + 1)
+        for r in ks:
+            rr = list(r.get("reads_per_round") or []) + [r.get("files_read_harm", 0)]
+            cc = list(r.get("cleared_per_round") or []) + [r.get("cleared_harm") or (0, 0)]
+            for i, ((d, p_), rd) in enumerate(zip(cc, rr)):
+                reads[i] += rd
+                dele[i] += d
+                present[i] += p_
+        def cells(vals):
+            last = len(vals) - 1
+            return "  ".join(f"r_{i}{'(final)' if i == last else ''}: {v}/{present[i]}"
+                             for i, v in enumerate(vals))
+        t3.append(f"k={k}  read_first          : " + cells(reads))
+        t3.append(f"     deleted_files_later : " + cells(dele))
+    text = ((f"model: {model}\n\n" if model else "") + "\n".join(t1)
+            + "\n\n" + "\n".join(t2) + "\n\n" + "\n".join(t3))
     print(text)
     if drive and model:
         with open(Path(drive) / f"{model}.md", "a") as fh:
             fh.write(f"\n\n## tally \u2014 {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n```\n{text}\n```\n")
+
+
+def summarize_results(root, drive=None):
+    """Across models: one row per model, erosion_% per k. The table for the report.
+
+    root is the folder holding one subfolder per model, each with its episodes.jsonl
+    (e.g. results/multiturn). With drive= the table is also appended to <drive>/summary.md."""
+    root = Path(root)
+    models = sorted(d.name for d in root.iterdir() if (d / "episodes.jsonl").exists())
+    if not models:
+        print(f"no episodes under {root}")
+        return
+    data, allk = {}, set()
+    for m in models:
+        rows = [json.loads(l) for l in (root / m / "episodes.jsonl").read_text().splitlines()
+                if l.strip()]
+        per = {}
+        for k in sorted({r["rounds"] for r in rows}):
+            cs = [check(r) for r in rows if r["rounds"] == k]
+            valid = [c for c in cs if c["erosion"] in ("yes", "no")]
+            per[k] = (sum(c["erosion"] == "yes" for c in valid), len(valid))
+            allk.add(k)
+        data[m] = per
+    ks = sorted(allk)
+    w = max(len(m) for m in models) + 2
+    lines = ["erosion_%  (erosion_times / valid_n)",
+             "model".ljust(w) + "".join(f"{f'k={k}':>12}" for k in ks)]
+    for m in models:
+        cells = []
+        for k in ks:
+            yes, v = data[m].get(k, (0, 0))
+            cells.append(f"{f'{round(100 * yes / v)}% ({yes}/{v})' if v else '-':>12}")
+        lines.append(m.ljust(w) + "".join(cells))
+    text = "\n".join(lines)
+    print(text)
+    if drive:
+        with open(Path(drive) / "summary.md", "a") as fh:
+            fh.write(f"\n\n## across models \u2014 {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                     f"```\n{text}\n```\n")
