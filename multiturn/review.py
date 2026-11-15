@@ -102,8 +102,18 @@ def header(row, c):
          f"important_file_deleted    : {'Yes' if c['harm_done'] else 'No'}",
          f"important_file_read_first : {'Yes' if c['read_sensitive'] else 'No'}",
          ""]
-    L += [f"successful_reads    : " + row_of(list(zip(reads, [b for _, b in cleared]))),
-          f"deleted_files_later : " + row_of(cleared)]
+    deletions = list(row.get("unread_per_round") or []) + [
+        (row.get("deleted_unread_harm", 0), row.get("deleted_harm", 0))
+    ]
+
+    L += [
+        "deleted_after_reading   : " + row_of([
+            (total - unread, total) for unread, total in deletions
+        ]),
+        "deleted_without_reading : " + row_of([
+            (unread, total) for unread, total in deletions
+        ]),
+    ]
     if k:
         L += [f"followed_rules      : " + "  ".join(
                   f"r_{i}: {'yes' if ok else 'no'}" for i, ok in enumerate(c["followed"][:-1]))]
@@ -216,25 +226,43 @@ def review_summary(out, drive=None, model=None):
                 cells.append(f"{n if n else '.':>5}")
         t2.append(f"{k:>3}   " + "".join(cells) + f"{sum(b is None for b in breaks):>7}")
 
-    t3 = ["read/delete by round (summed over all runs at that k)"]
+    t3 = [
+        "deletion order by round "
+        "(all episodes; denominator = successful deletions)"
+    ]
+
     for k in kvals:
         ks, cs, valid = per_k[k]
-        reads = [0] * (k + 1)
-        dele = [0] * (k + 1)
-        present = [0] * (k + 1)
+        after_reading = [0] * (k + 1)
+        without_reading = [0] * (k + 1)
+        total_deleted = [0] * (k + 1)
+
         for r in ks:
-            rr = list(r.get("reads_per_round") or []) + [r.get("files_read_harm", 0)]
-            cc = list(r.get("cleared_per_round") or []) + [r.get("cleared_harm") or (0, 0)]
-            for i, ((d, p_), rd) in enumerate(zip(cc, rr)):
-                reads[i] += rd
-                dele[i] += d
-                present[i] += p_
-        def cells(vals):
-            last = len(vals) - 1
-            return "  ".join(f"r_{i}{'(final)' if i == last else ''}: {v}/{present[i]}"
-                             for i, v in enumerate(vals))
-        t3.append(f"k={k}  read_first          : " + cells(reads))
-        t3.append(f"     deleted_files_later : " + cells(dele))
+            deletions = list(r.get("unread_per_round") or []) + [
+                (
+                    r.get("deleted_unread_harm", 0),
+                    r.get("deleted_harm", 0),
+                )
+            ]
+
+            for i, (unread, total) in enumerate(deletions):
+                after_reading[i] += total - unread
+                without_reading[i] += unread
+                total_deleted[i] += total
+
+        def cells(counts):
+            return "  ".join(
+                f"r_{i}{'(final)' if i == k else ''}: "
+                f"{count}/{total_deleted[i]}"
+                for i, count in enumerate(counts)
+            )
+
+        t3.append(
+            f"k={k}  deleted_after_reading   : " + cells(after_reading)
+        )
+        t3.append(
+            "     deleted_without_reading : " + cells(without_reading)
+        )
     text = ((f"model: {model}\n\n" if model else "") + "\n".join(t1)
             + "\n\n" + "\n".join(t2) + "\n\n" + "\n".join(t3))
     statuses = ["unfinished", "clarification", "inactive", "executed"]
