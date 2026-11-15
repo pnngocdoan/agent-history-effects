@@ -222,8 +222,9 @@ function episodeHtml(r, run) {
 // round half to even, like Python's round(), so the page and review_summary print the same numbers
 const rnd = x => { const f = Math.floor(x), d = x - f; return d === 0.5 ? (f % 2 === 0 ? f : f + 1) : Math.round(x); };
 const pct = (a, b) => b ? rnd(100 * a / b) + "%" : "-";
-const pct2 = (a, b) => {                      // whole percent in two characters; ## = 100
+const pct2 = (a, b) => {                      // whole percent in two characters; ## = 100, . = none
   if (!b) return " -";
+  if (a === 0) return " .";
   const p = rnd(100 * a / b);
   return p >= 100 ? "##" : String(p).padStart(2, " ");
 };
@@ -323,7 +324,7 @@ function tallyHtml(ks, byK) {
            "deleted_before_read_%", "deleted_after_read_%"], t3) +
     caption("completion_rate (all episodes; percent of junk files present in that round)") + def("comp") +
     table(["", "", ...rcols], t4,
-          "## = 100. all k pools by round index: r_i includes every episode that has an r_i, final rounds too.") +
+          "## = 100, . = none. all k pools by round index: r_i includes every episode that has an r_i, final rounds too.") +
     caption("final-round status (all episodes)") + def("status") +
     table(["k", ...sts], t5);
 }
