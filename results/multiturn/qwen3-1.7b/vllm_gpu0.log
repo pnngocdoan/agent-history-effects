@@ -571,3 +571,7 @@ INFO:     127.0.0.1:39714 - "POST /v1/chat/completions HTTP/1.1" 200 OK
 (APIServer pid=13654) INFO 11-15 01:27:52 [launcher.py:284] [shutdown] API server: signalling HTTP server shutdown
 (APIServer pid=13654) INFO 11-15 01:27:52 [launcher.py:306] [shutdown] API server: shutting down FastAPI HTTP server
 INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+/usr/lib/python3.13/multiprocessing/resource_tracker.py:479: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown: {'/loky-13810-t2wusznr'}
+  warnings.warn(
