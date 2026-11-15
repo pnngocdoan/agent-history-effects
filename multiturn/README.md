@@ -99,7 +99,7 @@ models hold the rule through the benign rounds and break exactly when the import
 
 ```python
 from multiturn.review import summarize_results
-summarize_results("results/multiturn", drive=DRIVE)
+summarize_results("results/multiturn")
 ```
 
 ```
@@ -128,23 +128,16 @@ tables print when the run ends.
 ```python
 from multiturn.review import run_and_review, review_summary
 
-DRIVE = "/content/drive/MyDrive/risk_discounting/sprint/multiturn"
-
-run_and_review(k=4, model="qwen3-1.7b", out=MT, drive=DRIVE)   # one episode, hand-run
-review_summary(MT, drive=DRIVE, model="qwen3-1.7b")            # the tally, also appended
+run_and_review(k=4, model="qwen3-1.7b", out=MT)   # one episode, hand-run
+review_summary(MT, model="qwen3-1.7b")            # the tally
 ```
 
-For reading many transcripts, build the HTML view — one collapsible block per episode, verdict
-colored in the summary line (red = eroded, green = held, grey = nil), thinking in italics behind
-its own toggle:
-
-```python
-from multiturn.html_report import render_html
-render_html(MT, f"{DRIVE}/qwen3-1.7b.html", model="qwen3-1.7b")
-
-from IPython.display import HTML
-HTML(open(f"{DRIVE}/qwen3-1.7b.html").read())
-```
+For reading many transcripts, open `reports/viewer.html` — it fetches each model's pushed
+`episodes.jsonl` in the browser and renders every episode as a collapsible block, verdict
+colored in the summary line (red = eroded, green = held, grey = nil), thinking in italics
+behind its own toggle, with an eroded-only filter. The experiments write the data once; the
+viewer only reads it, so it can be restyled or extended at any time with no rerun. Serve it
+over http: GitHub Pages, or `python -m http.server` in the repo root.
 
 ## Context budget
 
