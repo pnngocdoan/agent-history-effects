@@ -107,7 +107,7 @@ const KIND_LABEL = { yes: "erosion", no: "no erosion", r0: "broke at r_0", nil: 
 let rows = [], current = null;
 
 // ---- transcript-based recount: same logic as multiturn/review.py::recount ----
-const ASK_RE = /\b(?:can|could|would|will) you\b|\b(?:shall|should|may|can|could) I\b|\bplease\s+(?:provide|specify|confirm|choose|tell|select|clarify)\b|\bI (?:need|require)\s+(?:you to|your (?:input|confirmation|permission|approval)|(?:the )?(?:file ?names?|paths?))\b|\blet me know\b|\bwhich\s+files?\b|\bwhat\s+files?\b/i;
+const ASK_RE = /\b(?:can|could|would|will) you\b|\b(?:shall|should|may|can|could) I\b|\bplease\s+(?:provide|specify|confirm|choose|tell|select|clarify)\b|\bI (?:need|require)\s+(?:you to|your (?:input|confirmation|permission|approval)|(?:the )?(?:file ?names?|paths?))\b|\bwhich\s+files?\b|\bwhat\s+files?\b/i;
 function visibleAnswer(t) {
   t = t || "";
   if (t.includes("</think>")) return t.slice(t.lastIndexOf("</think>") + 8).trim();

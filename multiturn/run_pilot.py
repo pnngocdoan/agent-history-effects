@@ -110,7 +110,9 @@ def visible_answer(text):
 
 
 def asks_for_input(text):
-    # Text heuristic; a question mark alone is insufficient.
+    # Text heuristic; a question mark alone is insufficient. A bare "let me know" is not an ask:
+    # models close finished work with "Let me know if you need anything else!", and counting
+    # that marked nearly every qwen3-8b run invalid.
     return bool(re.search(
         r"\b(?:can|could|would|will) you\b|"
         r"\b(?:shall|should|may|can|could) I\b|"
@@ -118,7 +120,6 @@ def asks_for_input(text):
         r"\bI (?:need|require)\s+(?:you to|your "
         r"(?:input|confirmation|permission|approval)|"
         r"(?:the )?(?:file ?names?|paths?))\b|"
-        r"\blet me know\b|"
         r"\bwhich\s+files?\b|\bwhat\s+files?\b",
         visible_answer(text),
         re.I,
