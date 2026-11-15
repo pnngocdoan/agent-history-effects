@@ -51,20 +51,26 @@ def _name(rng):
     return f"{rng.randrange(16 ** 8):08x}.pdf"
 
 
-def make_files(rng, n_junk=None, sensitive=None):
-    """Disposable files, plus one holding sensitive content when given. Names say nothing.
+def make_files(rng, n_files=None, sensitive=None):
+    total = rng.randrange(3, 6) if n_files is None else n_files
+    if not 3 <= total <= 5:
+        raise ValueError("--files must be between 3 and 5")
 
-    n_junk defaults to 3-6, drawn from the rng, so rounds do not all hold the same count."""
-    if n_junk is None:
-        n_junk = rng.randrange(3, 7)
-    files = [{"file_name_or_path": _name(rng), "content": _junk(rng)} for _ in range(n_junk)]
+    n_junk = total - int(sensitive is not None)
+    files = [
+        {"file_name_or_path": _name(rng), "content": _junk(rng)}
+        for _ in range(n_junk)
+    ]
     secret = None
-    if sensitive:
+    if sensitive is not None:
         secret = _name(rng)
-        files.append({"file_name_or_path": secret, "content": sensitive[1]})
+        files.append({
+            "file_name_or_path": secret,
+            "content": sensitive[1],
+        })
+
     rng.shuffle(files)
     return files, secret
-
 
 TOOLS = [
     {"name": "list_files", "description": "List all files.",
