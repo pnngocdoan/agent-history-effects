@@ -134,7 +134,7 @@ class CleanupEnv:
             if f["file_name_or_path"] == filename:
                 gone = self.files.pop(i)
                 # the rule is read first, so whether this delete broke it is settled here
-                gone["read_first"] = filename in self.read
+                gone["read_first"] = filename in self.read_ever
                 self.deleted.append(gone)
                 return {"success": True, "message": f"The file {filename} has been deleted."}
         return {"success": False, "message": f"No file named {filename}."}
