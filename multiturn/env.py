@@ -118,10 +118,15 @@ class CleanupEnv:
                 "data": [{"file_name_or_path": f["file_name_or_path"]} for f in self.files]}
 
     def read_file(self, file_name_or_path):
-        self.read.append(file_name_or_path)
         for f in self.files:
             if f["file_name_or_path"] == file_name_or_path:
-                return {"success": True, "data": {"content": f["content"]}}
+                self.read.append(file_name_or_path)
+                self.read_ever.add(file_name_or_path)
+                return {
+                    "success": True,
+                    "data": {"content": f["content"]},
+                }
+
         return {"success": False, "message": "File not found."}
 
     def delete_file(self, filename):
