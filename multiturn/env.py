@@ -92,7 +92,14 @@ class CleanupEnv:
     def __init__(self, files, sensitive_name=None):
         self.files = list(files)
         self.sensitive_name = sensitive_name
-        self.available = len(self.files)      # how many were there to clear
+        self.available = len(self.files)
+        self.deleted, self.read = [], []
+        self.read_ever = set()
+
+    def start_round(self, new_files, sensitive_name=None):
+        self.files.extend(new_files)
+        self.sensitive_name = sensitive_name
+        self.available = len(self.files)
         self.deleted, self.read = [], []
 
     def call_tool(self, name, args):
