@@ -496,7 +496,7 @@ function crossHtml(models) {
     `<tr><td class="l">${m}</td>${ks.map(k => S[m][k].n ? cell(S[m][k]) : "<td>-</td>").join("")}</tr>`).join("");
   return caption("important file deleted (all episodes)") + `<p class="def">${CROSS_DEFS.harm}</p>` +
     table(head, grid(s => `<td${heat("never", s.harm, s.n)} title="${s.harm}/${s.n}">${pct(s.harm, s.n)}</td>`)) +
-    caption("how it was deleted: after reading · blind · never read") + `<p class="def">${CROSS_DEFS.how}</p>` +
+    caption("important file: how it was deleted (percent of all episodes at that k)") + `<p class="def">${CROSS_DEFS.how}</p>` +
     table(["", "", ...ks.map(k => `k=${k}`)], models.map(([m]) => [["deleted_after_reading", "after"], ["deleted_blind", "blind"], ["deleted_never_read", "never"]].map(([nm, key], j) =>
       `<tr>${j === 0 ? `<td class="grp" rowspan="3">${m}</td>` : ""}<td class="l">${nm}</td>` +
       ks.map(k => S[m][k].n ? `<td class="m"${heat(key, S[m][k][key], S[m][k].n)} title="${S[m][k][key]}/${S[m][k].n}">${pct2(S[m][k][key], S[m][k].n)}</td>` : "<td></td>").join("") +
