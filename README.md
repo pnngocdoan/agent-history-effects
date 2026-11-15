@@ -1,88 +1,39 @@
-# Harmless history and the honesty gap
+# Rule erosion in tool-using agents
 
-Does an agent that knows a risk ignore it out of convenience, after seeing its own past risky
-actions end harmlessly?
+**The question.** An agent is given explicit rules — read a file before deleting it, and
+never delete an important one — and then does ordinary cleanup work, round after round, in
+one session. Every early round it handles correctly. Does it still follow the rules at the
+end of the session, or does benign precedent alone erode them?
 
-**Hypothesis.** It says it would be careful, then executes unsafely, and the gap is wider with more
-history.
+We call the behaviour **rule erosion**: the agent follows the rules in every earlier round,
+then breaks them. Nothing in the context ever escalates and no prior round contains an
+example of rule-breaking, so any erosion comes from repetition and routine, not from bad
+examples.
 
-Research conducted at the [AI x Epistemics Research Sprint](https://apartresearch.com/sprints/ai-x-epistemics-research-sprint-2026-11-13-to-2026-11-15), November 2026.
+## What is here
 
-## The design
-
-Three conditions, the same tasks, the risk named in all three:
-
-| | what the agent sees |
-| --- | --- |
-| `BASE` | the task + `### Known risk <risky action> may lead to <harm>.` |
-| `H2` | `BASE` + 2 of the agent's own past runs where it took the risky action and no harm followed |
-| `H5` | `BASE` + 5 of those |
-
-Two measurements per task:
-
-- **belief** — a separate run with no tools: the model answers Risk / Reasoning / Plan, and its
-  `<think>` block is saved.
-- **execution** — the same prompt with tools: the agent acts, ShieldAgent labels the trajectory safe
-  or unsafe, and its `<think>` is saved.
-
-Claude Haiku then compares the pair for each task and condition: did the agent follow its own plan,
-did it skip a precaution its plan named, does its thinking cite the earlier experiences as a reason
-the task is fine.
-
-Tasks come from [Agent-SafetyBench](https://github.com/thu-coai/Agent-SafetyBench). Of the 100 tasks
-in the saved histories, 71 have at least 2 usable histories and 57 have at least 5, so `BASE` against
-`H2` is compared on 71 tasks and `BASE` against `H5` on 57. A third table puts all three side by side
-on the tasks they all share. No task is dropped for being unsafe in every `BASE` run.
+- [`multiturn/`](multiturn/) — the whole experiment: environment, runner, checker,
+  transcript viewer and review loop. Its [README](multiturn/README.md) describes the design,
+  the metrics and how to read an episode.
+- `serve.py` — starts a local vLLM server for the model under test (used by the notebook).
+- `Untitled2.ipynb` — the Colab notebook that serves a model and runs episodes one at a
+  time for review.
 
 ## Running it
 
-`notebook.ipynb` runs every step on Colab (an L4 is enough for the 4-bit Qwen3 models) and writes to
-the local disk first, copying to Drive after each step and every 15 minutes.
+A vLLM server must be serving the model (the notebook does this, or see `serve.py`). Then:
 
-By hand, from the repo root:
-
-```bash
-git submodule update --init
-bash tools/apply_patches.sh
-pip install vllm openpyxl
-
-python scripts/1_select_tasks.py --long 2
-python scripts/2_build_conditions.py --lengths 2 5
-python scripts/3_run_belief.py --model Qwen/Qwen3-8B-AWQ --out results/qwen3-8b --runs 3
-python scripts/4_run_agent.py  --model Qwen/Qwen3-8B-AWQ --out results/qwen3-8b --runs 3 --only BASE
-python scripts/4_run_agent.py  --model Qwen/Qwen3-8B-AWQ --out results/qwen3-8b --runs 3 --only H2
-python scripts/4_run_agent.py  --model Qwen/Qwen3-8B-AWQ --out results/qwen3-8b --runs 3 --only H5
-python scripts/5_judge.py      --out results/qwen3-8b
-ANTHROPIC_API_KEY=... python scripts/6_compare.py --out results/qwen3-8b
-python scripts/7_analyze.py    --out results/qwen3-8b
+```
+python multiturn/run_pilot.py --model qwen3-1.7b --rounds 0 1 2 3 4 5 --episodes 10 \
+    --out results/multiturn/qwen3-1.7b
 ```
 
-Every script takes `--help`, writes its results as it goes, and skips finished work when run again.
+or, one reviewed episode at a time, from a notebook:
 
-| script | what it does |
-| --- | --- |
-| `1_select_tasks.py` | keeps the tasks that have at least 2 histories |
-| `2_build_conditions.py` | writes `BASE`, `H2` and `H5` |
-| `3_run_belief.py` | the belief run (no tools) |
-| `4_run_agent.py` | the execution run (tools) |
-| `5_judge.py` | ShieldAgent: safe or unsafe |
-| `6_compare.py` | Haiku: belief against execution |
-| `7_analyze.py` | one table per pair of conditions, each on the tasks they share, with bootstrap intervals |
+```python
+from multiturn.review import run_and_review, review_summary
+run_and_review(k=3, model="qwen3-1.7b", out="results/multiturn/qwen3-1.7b")
+review_summary("results/multiturn/qwen3-1.7b")
+```
 
-## Provenance
-
-Work done before the sprint, reused here unchanged:
-
-- `data/histories.xlsx` — the `p_lines` and `histories` tabs of the audit sheet from the earlier
-  100-task run. The histories were collected with Qwen2.5-3B-Instruct and judged with ShieldAgent.
-- `data/tasks_pool.json` — the filtered Agent-SafetyBench pool (completable, tool-using tasks).
-- `tools/runner.py` — GPU discovery, the vLLM servers and the per-task job runner.
-- `tools/patches/` — 15 patches to the benchmark, and `tools/apply_patches.sh`.
-- `tools/audit_sheet.py` — reading and writing the audit sheet.
-- The ShieldAgent loop inside `scripts/5_judge.py`.
-
-All of the above comes from [risk-discounting-agents-beta](https://github.com/pnngocdoan/risk-discounting-agents-beta),
-which also holds the earlier pilot on Qwen2.5-14B-Instruct-AWQ.
-
-New in this sprint: the three conditions, the belief run, the belief-against-execution comparison,
-the analysis, and this notebook.
+All code in this repository was written during the Apart Research AI x Epistemics sprint.
