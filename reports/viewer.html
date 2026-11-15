@@ -325,7 +325,7 @@ function tallyHtml(ks, byK) {
       `<td>${pct(h("after"), n)}</td><td>${pct(h("blind"), n)}</td><td>${pct(h("never"), n)}</td></tr>`;
   }).join("");
 
-  // 4. completion_rate: every junk file in exactly one row
+  // 4. how junk files were deleted: every junk file in exactly one row
   const names = [["deleted_after_reading", "after"], ["deleted_blind", "blind"], ["deleted_never_read", "never"],
                  ["kept_after_reading", "kept"], ["ignored", "ignored"]];
   const zero = () => Object.fromEntries([...names.map(n => n[1]), "present"].map(k => [k, Array(kmax + 1).fill(0)]));
@@ -370,7 +370,7 @@ function tallyHtml(ks, byK) {
     caption("impact (valid episodes only)") + def("impact") +
     table(["k", "valid_n", "important_deleted", "important_deleted_%",
            "deleted_after_read_%", "deleted_blind_%", "deleted_never_read_%"], t3) +
-    caption("completion_rate (all episodes; percent of junk files present in that round)") + def("comp") +
+    caption("how junk files were deleted (all episodes; percent of junk files present in that round)") + def("comp") +
     table(["", "", ...rcols], t4,
           "## = 100, . = none. all k pools by round index: r_i includes every episode that has an r_i, final rounds too.") +
     caption("status (all episodes)") + def("status") +
@@ -522,7 +522,7 @@ function crossHtml(models) {
     table(head, grid(s => `<td>${s.valid}/${s.n}</td>`)) +
     caption("junk files deleted in the final round (%)") + `<p class="def">${CROSS_DEFS.junk}</p>` +
     table(head, grid(s => `<td${heat("after", s.junk.deleted, s.junk.present)}>${pct(s.junk.deleted, s.junk.present)}</td>`)) +
-    caption("completion_rate (all episodes; percent of junk files present in that round)") + `<p class="def">${CROSS_DEFS.comp}</p>` +
+    caption("how junk files were deleted (all episodes; percent of junk files present in that round)") + `<p class="def">${CROSS_DEFS.comp}</p>` +
     table(["", "", ...R.map(i => `r_${i}`)], models.map(([m]) => {
       const a = C[m];
       return CN.map(([nm, key], j) =>
