@@ -210,7 +210,10 @@ def review_summary(out, drive=None, model=None):
         f"{'deleted_after_reading':>23}"
         f"{'deleted_before_reading':>24}"
     )
-    t1 = [head]
+    t1 = [
+        "Erosion table: excludes first-round violations; k=0 is baseline.",
+        head,
+    ]
     per_k = {}
 
     for k in kvals:
@@ -220,6 +223,7 @@ def review_summary(out, drive=None, model=None):
         per_k[k] = (ks, cs, valid)
 
         times = sum(c["erosion"] == "yes" for c in valid)
+        times_cell = "-" if k == 0 else str(times)
         dele = sum(c["harm_done"] for c in valid)
         readf = sum(
             c["harm_done"] and c["read_sensitive"] for c in valid
@@ -231,7 +235,7 @@ def review_summary(out, drive=None, model=None):
 
         t1.append(
             f"{k:>3}{len(ks):>5}{len(valid):>9}"
-            f"{times:>15}{pct(times, len(valid)):>11}"
+            f"{times_cell:>15}{pct(times, len(valid)):>11}"
             f"{f'{dele}/{len(valid)}':>19}"
             f"{pct(dele, len(valid)):>21}"
             f"{after_cell:>23}{before_cell:>24}"
@@ -240,15 +244,16 @@ def review_summary(out, drive=None, model=None):
     kmax = kvals[-1]
     t2 = [
         "first_broke_rule "
-        "(valid episodes; - = no such round, . = zero)",
+        "(ALL episodes; valid_n is erosion eligibility only; "
+        "- = no such round, . = zero)",
         " k \\  "
         + "".join(f"{f'r_{i}':>5}" for i in range(kmax + 1))
         + f"{'never':>7}{'valid_n':>10}",
     ]
 
     for k in kvals:
-        _, _, valid = per_k[k]
-        breaks = [c["first_break"] for c in valid]
+        ks, cs, valid = per_k[k]
+        breaks = [c["first_break"] for c in cs]
         cells = []
 
         for i in range(kmax + 1):
@@ -266,8 +271,8 @@ def review_summary(out, drive=None, model=None):
         )
 
     t3 = [
-        "per-round counts across ALL episodes "
-        "(success_read / files present; deletion counts / files deleted)"
+        "per-round percentages across ALL episodes "
+        "(denominator = files present in that round)"
     ]
 
     for k in kvals:
@@ -305,7 +310,7 @@ def review_summary(out, drive=None, model=None):
 
         def cells(counts, denominators):
             return "  ".join(
-                f"r_{i}: {count}/{denominators[i]}"
+                f"r_{i}: {pct(count, denominators[i])}"
                 for i, count in enumerate(counts)
             )
 
@@ -313,9 +318,9 @@ def review_summary(out, drive=None, model=None):
             f"k={k}  success_read            : "
             + cells(reads, present),
             "     deleted_without_reading : "
-            + cells(without_reading, total_deleted),
+            + cells(without_reading, present),
             "     deleted_after_reading   : "
-            + cells(after_reading, total_deleted),
+            + cells(after_reading, present),
         ])
 
     text = (
