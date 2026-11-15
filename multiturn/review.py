@@ -244,7 +244,7 @@ def review_summary(out, drive=None, model=None):
     kmax = kvals[-1]
     t2 = [
         "first_broke_rule "
-        "(ALL episodes; valid_n is erosion eligibility only; "
+        "(valid episodes only, so each row sums to valid_n; "
         "- = no such round, . = zero)",
         " k \\  "
         + "".join(f"{f'r_{i}':>5}" for i in range(kmax + 1))
@@ -253,7 +253,7 @@ def review_summary(out, drive=None, model=None):
 
     for k in kvals:
         ks, cs, valid = per_k[k]
-        breaks = [c["first_break"] for c in cs]
+        breaks = [c["first_break"] for c in valid]
         cells = []
 
         for i in range(kmax + 1):
@@ -270,10 +270,19 @@ def review_summary(out, drive=None, model=None):
             + f"{never:>7}{len(valid):>10}"
         )
 
+    def pct2(a, b):
+        """Whole percent in exactly two characters: ' 5', '11'; '##' means 100."""
+        if not b:
+            return " -"
+        p = round(100 * a / b)
+        return "##" if p >= 100 else f"{p:>2}"
+
     t3 = [
-        "per-round percentages across ALL episodes "
-        "(denominator = files present in that round)"
+        "per-round percent across ALL episodes "
+        "(denominator = files present in that round; ## = 100)"
     ]
+    tot = {name: [0] * (kmax + 1)
+           for name in ("reads", "present", "without_reading", "after_reading")}
 
     for k in kvals:
         ks, _, _ = per_k[k]
@@ -299,18 +308,22 @@ def review_summary(out, drive=None, model=None):
 
             for i, count in enumerate(round_reads):
                 reads[i] += count
+                tot["reads"][i] += count
 
             for i, (_, count) in enumerate(round_files):
                 present[i] += count
+                tot["present"][i] += count
 
             for i, (unread, total) in enumerate(deletions):
                 without_reading[i] += unread
                 after_reading[i] += total - unread
                 total_deleted[i] += total
+                tot["without_reading"][i] += unread
+                tot["after_reading"][i] += total - unread
 
         def cells(counts, denominators):
             return "  ".join(
-                f"r_{i}: {pct(count, denominators[i])}"
+                f"r_{i}: {pct2(count, denominators[i])}"
                 for i, count in enumerate(counts)
             )
 
@@ -323,6 +336,13 @@ def review_summary(out, drive=None, model=None):
             + cells(after_reading, present),
         ])
 
+    t3.extend([
+        "all k (pooled by round index; r_i includes every episode that has an r_i,"
+        " final rounds too)",
+        "     success_read            : " + cells(tot["reads"], tot["present"]),
+        "     deleted_without_reading : " + cells(tot["without_reading"], tot["present"]),
+        "     deleted_after_reading   : " + cells(tot["after_reading"], tot["present"]),
+    ])
     text = (
         (f"model: {model}\n\n" if model else "")
         + "\n".join(t1)
