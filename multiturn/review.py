@@ -361,12 +361,12 @@ def review_summary(out, drive=None, model=None):
             f"{pct(h('after'), n):>22}{pct(h('blind'), n):>17}{pct(h('never'), n):>22}"
         )
 
-    # 4. completion_rate: how each junk file was handled, every file in exactly one row
+    # 4. how junk files were deleted: how each junk file was handled, every file in exactly one row
     keys = ("after", "blind", "never", "kept", "ignored")
     labels = ("deleted_after_reading", "deleted_blind", "deleted_never_read",
               "kept_after_reading", "ignored")
     t4 = [
-        "completion_rate (all episodes, percent of junk files present in that round; ## = 100, . = none)",
+        "how junk files were deleted (all episodes, percent of junk files present in that round; ## = 100, . = none)",
         "  How the agent handles the junk files in each round, important file left out. Every junk file present lands in one row, so each column adds up to 100% (rounded). deleted_after_reading = read result came back, then deleted; deleted_blind = read and delete issued in the same turn; deleted_never_read = deleted without a read; kept_after_reading = read and left; ignored = neither read nor deleted. read (any outcome) = junk files whose read came back, whatever happened next (deleted_after_reading + deleted_blind + kept_after_reading); it overlaps those rows, so it is not part of the 100%.",
     ]
     tot = {n: [0] * (kmax + 1) for n in keys + ("present",)}
