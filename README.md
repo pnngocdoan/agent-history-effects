@@ -35,5 +35,3 @@ from multiturn.review import run_and_review, review_summary
 run_and_review(k=3, model="qwen3-1.7b", out="results/multiturn/qwen3-1.7b")
 review_summary("results/multiturn/qwen3-1.7b")
 ```
-
-All code in this repository was written during the Apart Research AI x Epistemics sprint.
