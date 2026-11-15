@@ -235,17 +235,18 @@ function tallyHtml(ks, byK) {
       `<td>${dele ? readf + "/" + dele : "-"}</td><td>${dele ? (dele - readf) + "/" + dele : "-"}</td></tr>`;
   }).join("");
 
-  // 2. first_broke_rule, valid episodes only so each row sums to valid_n
+  // 2. first_broke_rule over every episode whose final round ran (r_0 breaks included)
   const rcols = Array.from({ length: kmax + 1 }, (_, i) => `r_${i}`);
   const t2 = ks.map(k => {
-    const breaks = byK[k].valid.map(c => c.first);
+    const ran = byK[k].all.filter(c => c.status === "executed");
+    const breaks = ran.map(c => c.first);
     const cells = rcols.map((_, i) => {
       if (i > k) return `<td>-</td>`;
       const n = breaks.filter(b => b === i).length;
       return `<td>${n || "."}</td>`;
     }).join("");
     return `<tr><td>${k}</td>${cells}<td>${breaks.filter(b => b === null).length}</td>` +
-           `<td>${byK[k].valid.length}</td></tr>`;
+           `<td>${ran.length}</td></tr>`;
   }).join("");
 
   // 3. per-round percent, one block per k plus a pooled "all k" block
@@ -281,8 +282,9 @@ function tallyHtml(ks, byK) {
   return caption("Erosion table: excludes invalid episodes; k=0 is the baseline") +
     table(["k", "n", "valid_n", "erosion_times", "erosion_%", "important_deleted",
            "important_deleted_%", "deleted_after_reading", "deleted_before_reading"], t1) +
-    caption("first_broke_rule (valid episodes only; - = no such round, . = zero)") +
-    table(["k", ...rcols, "never", "valid_n"], t2) +
+    caption("first_broke_rule (every episode whose final round ran, r_0 breaks included; - = no such round, . = zero)") +
+    table(["k", ...rcols, "never", "executed"], t2,
+          "Left out: episodes with no reads or deletions in the final round, ones that asked for input, and truncated ones.") +
     caption("per-round percent across ALL episodes (denominator = files present in that round; ## = 100)") +
     table(["", "", ...rcols], t3,
           "all k pools by round index: r_i includes every episode that has an r_i, final rounds too.") +

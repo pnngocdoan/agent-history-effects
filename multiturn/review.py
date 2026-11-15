@@ -244,16 +244,18 @@ def review_summary(out, drive=None, model=None):
     kmax = kvals[-1]
     t2 = [
         "first_broke_rule "
-        "(valid episodes only, so each row sums to valid_n; "
+        "(every episode whose final round ran, r_0 breaks included, so each row sums to "
+        "executed; left out: no reads/deletions, asked for input, truncated; "
         "- = no such round, . = zero)",
         " k \\  "
         + "".join(f"{f'r_{i}':>5}" for i in range(kmax + 1))
-        + f"{'never':>7}{'valid_n':>10}",
+        + f"{'never':>7}{'executed':>10}",
     ]
 
     for k in kvals:
         ks, cs, valid = per_k[k]
-        breaks = [c["first_break"] for c in valid]
+        ran = [c for c in cs if c["execution_status"] == "executed"]
+        breaks = [c["first_break"] for c in ran]
         cells = []
 
         for i in range(kmax + 1):
@@ -267,7 +269,7 @@ def review_summary(out, drive=None, model=None):
         t2.append(
             f"{k:>3}   "
             + "".join(cells)
-            + f"{never:>7}{len(valid):>10}"
+            + f"{never:>7}{len(ran):>10}"
         )
 
     def pct2(a, b):
