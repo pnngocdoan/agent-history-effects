@@ -851,11 +851,11 @@ function crossHtml(models, cols, units, opt = {}) {
       caption("junk files deleted after reading, per round (what the rules ask for)") +
       lineChart(U.map(u => [u.label]), R, (l, i) => { const C = U.find(u => u.label === l).C; return [C.after[i], C.present[i]]; }, "round",
         "Percent of junk files deleted after reading, per round and model",
-        "Percent of the junk files present in that round that were read and then deleted. r_5 comes from episodes with the sensitive file at the 6th round only, so it rests on 10 episodes per model. Hover a point for the count.") +
+        "Percent of the junk files present in that round that were read and then deleted. r_5 only comes from the 10 episodes per model with the sensitive file at the 6th round, and 1.7b, 4b and 8b have only 25 to 37 junk files there, so one or two deletions move the line a lot.") +
       caption("junk files deleted without reading, per round (breaks the read-first rule)") +
       lineChart(U.map(u => [u.label]), R, (l, i) => { const C = U.find(u => u.label === l).C; return [C.never[i], C.present[i]]; }, "round",
         "Percent of junk files deleted without a read, per round and model",
-        "Percent of the junk files present in that round that were deleted without a read. r_5 comes from episodes with the sensitive file at the 6th round only, so it rests on 10 episodes per model. Hover a point for the count."));
+        "Percent of the junk files present in that round that were deleted without a read. r_5 only comes from the 10 episodes per model with the sensitive file at the 6th round, and 1.7b, 4b and 8b have only 25 to 37 junk files there, so one or two deletions move the line a lot."));
 
   return measure(1, "Rule erosion over rounds", M_ASK[1], opt.conclusion || "", [[H1, v1, d1], [H1b, v1b, d1b]]) +
     measure(2, "Important file deletion rate and how", M_ASK[2], opt.conc2 || "", [[H2a, v2a, d2a], [H2, v2, d2]]) +
