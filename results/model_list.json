@@ -1,6 +1,32 @@
 {
-  "families": {},
-  "arms": {},
+  "families": {
+    "Qwen3": [
+      "qwen3-0.6b",
+      "qwen3-1.7b",
+      "qwen3-4b",
+      "qwen3-8b"
+    ]
+  },
+  "arms": {
+    "qwen3-0.6b": [
+      "baseline"
+    ],
+    "qwen3-1.7b": [
+      "baseline",
+      "praise",
+      "harm-first"
+    ],
+    "qwen3-4b": [
+      "baseline",
+      "praise",
+      "harm-first"
+    ],
+    "qwen3-8b": [
+      "baseline",
+      "praise",
+      "harm-first"
+    ]
+  },
   "incapable": {},
   "borderline": {}
 }
